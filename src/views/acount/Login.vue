@@ -18,20 +18,38 @@
         size="medium"
         class="form_login"
       >
-        <label class="style = wordStyle">用户名</label>
-        <el-form-item prop="pass">
-          <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
-        </el-form-item>
-        <label class="style = wordStyle">密码</label>
-        <el-form-item prop="checkPass">
-          <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+        <el-form-item prop="username">
+          <label class="style = wordStyle">邮箱</label>
+          <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
         </el-form-item>
 
-        <label class="style = wordStyle">验证码</label>
-        <el-form-item prop="age">
+        <el-form-item prop="password">
+          <label class="style = wordStyle">密码</label>
+          <el-input
+            type="password"
+            v-model="ruleForm.password"
+            autocomplete="off"
+            minlength="6"
+            maxlength="20"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item prop="passwords">
+          <label class="style = wordStyle">重复密码</label>
+          <el-input
+            type="password"
+            v-model="ruleForm.passwords"
+            autocomplete="off"
+            minlength="6"
+            maxlength="20"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item prop="code" v-if="model === 'resgister'">
+          <label class="style = wordStyle">验证码</label>
           <el-row>
             <el-col :span="16">
-              <el-input v-model.number="ruleForm.age"></el-input>
+              <el-input v-model.number="ruleForm.code" minlength="6" maxlength="6"></el-input>
             </el-col>
 
             <el-col :span="8">
@@ -48,58 +66,77 @@
   </div>
 </template>
 <script>
+import {
+  stripscript,
+  validateEmail,
+  validatePass,
+  validateCode1
+} from "@/tools/check.js";
 export default {
-  name: "Login",
+  name: "login",
   data() {
-    var checkAge = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error("年龄不能为空"));
-      }
-      setTimeout(() => {
-        if (!Number.isInteger(value)) {
-          callback(new Error("请输入数字值"));
-        } else {
-          if (value < 18) {
-            callback(new Error("必须年满18岁"));
-          } else {
-            callback();
-          }
-        }
-      }, 1000);
-    };
-    var validatePass = (rule, value, callback) => {
+    //验证用户名
+    var validateUsername = (rule, value, callback) => {
+      // let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
       if (value === "") {
         callback(new Error("请输入用户名"));
+        //邮箱验证check.js
+      } else if (validateEmail(value)) {
+        callback(new Error("用户名格式错误"));
       } else {
-        if (this.ruleForm.checkPass !== "") {
-          this.$refs.ruleForm.validateField("checkPass");
-        }
         callback();
       }
     };
-    var validatePass2 = (rule, value, callback) => {
+    //验证密码
+    var validatePassword = (rule, value, callback) => {
+      // let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
       if (value === "") {
-        callback(new Error("请再次输入密码"));
-      } else if (value !== this.ruleForm.pass) {
-        callback(new Error("两次输入密码不一致!"));
+        callback(new Error("请输入密码"));
+      } else if (validatePass(value)) {
+        callback(new Error("密码应该为6-20位的数字和字母!"));
+      } else {
+        callback();
+      }
+    };
+    //重复密码
+    var validatePasswords = (rule, value, callback) => {
+      // let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
+      if (value === "") {
+        callback(new Error("请输入密码"));
+      } else if (value != this.ruleForm.password) {
+        callback(new Error("与第一次密码不相同"));
+      } else {
+        callback();
+      }
+    };
+    //验证码
+    var validateCode = (rule, value, callback) => {
+      // let reg = /^[a-z0-9]{6}$/;
+      if (value === "") {
+        callback(new Error("请输入验证码"));
+      } else if (validateCode1(value)) {
+        callback(new Error("请输入正确的验证码"));
       } else {
         callback();
       }
     };
     return {
       menuTab: [
-        { txt: "登录", current: true },
-        { txt: "注册", current: false }
+        { txt: "登录", current: true, type: "login" },
+        { txt: "注册", current: false, type: "resgister" }
       ],
+      model: "login",
       ruleForm: {
-        pass: "",
-        checkPass: "",
-        age: ""
+        username: "",
+        password: "",
+        passwords: "",
+        code: ""
       },
       rules: {
-        pass: [{ validator: validatePass, trigger: "blur" }],
-        checkPass: [{ validator: validatePass2, trigger: "blur" }],
-        age: [{ validator: checkAge, trigger: "blur" }]
+        username: [{ validator: validateUsername, trigger: "blur" }],
+        password: [{ validator: validatePassword, trigger: "blur" }],
+        passwords: [{ validator: validatePasswords, trigger: "blur" }],
+        code: [{ validator: validateCode, trigger: "blur" }]
       }
     };
   },
@@ -107,7 +144,6 @@ export default {
   mounted() {},
   methods: {
     //vue 数据驱动视频渲染
-
     //用data接受点击事件传递而来的参数item
     changeTab(data) {
       //es6语法forEach循环遍历
@@ -116,6 +152,8 @@ export default {
       });
       //再给传入的data加入高光
       data.current = true;
+      //修改模块的值，切换login和resgister
+      this.model = data.type;
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
