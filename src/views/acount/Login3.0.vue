@@ -54,7 +54,7 @@
             </el-col>
 
             <el-col :span="8">
-              <el-button type="primary" class="block margin-left-15px" @click="getSms()">获取验证码</el-button>
+              <el-button type="primary" class="block margin-left-15px">获取验证码</el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -67,7 +67,7 @@
   </div>
 </template>
 <script>
-import { GetSms } from "@/api/login.js";
+import { reactive, ref, isRef, toRefs, onMounted } from "vue";
 import {
   stripscript,
   validateEmail,
@@ -76,9 +76,11 @@ import {
 } from "@/tools/check.js";
 export default {
   name: "login",
-  data() {
+  setup(context) {
+    //这里面放data，生命周期，自定义方法
+
     //验证用户名
-    var validateUsername = (rule, value, callback) => {
+    let validateUsername = (rule, value, callback) => {
       // let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
       if (value === "") {
         callback(new Error("请输入用户名"));
@@ -90,7 +92,7 @@ export default {
       }
     };
     //验证密码
-    var validatePassword = (rule, value, callback) => {
+    let validatePassword = (rule, value, callback) => {
       // let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
       if (value === "") {
         callback(new Error("请输入密码"));
@@ -101,18 +103,18 @@ export default {
       }
     };
     //重复密码
-    var validatePasswords = (rule, value, callback) => {
+    let validatePasswords = (rule, value, callback) => {
       // let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
       if (value === "") {
         callback(new Error("请输入密码"));
-      } else if (value != this.ruleForm.password) {
+      } else if (value != ruleForm.password) {
         callback(new Error("与第一次密码不相同"));
       } else {
         callback();
       }
     };
     //验证码
-    var validateCode = (rule, value, callback) => {
+    let validateCode = (rule, value, callback) => {
       // let reg = /^[a-z0-9]{6}$/;
       if (value === "") {
         callback(new Error("请输入验证码"));
@@ -122,46 +124,45 @@ export default {
         callback();
       }
     };
-    return {
-      menuTab: [
-        { txt: "登录", current: true, type: "login" },
-        { txt: "注册", current: false, type: "resgister" }
-      ],
-      model: "login",
-      ruleForm: {
-        username: "",
-        password: "",
-        passwords: "",
-        code: ""
-      },
-      rules: {
-        username: [{ validator: validateUsername, trigger: "blur" }],
-        password: [{ validator: validatePassword, trigger: "blur" }],
-        passwords: [{ validator: validatePasswords, trigger: "blur" }],
-        code: [{ validator: validateCode, trigger: "blur" }]
-      }
-    };
-  },
-  created() {},
-  mounted() {
-    //
-  },
-  methods: {
-    //vue 数据驱动视频渲染
+    //表单验证
+    const rules = reactive({
+      username: [{ validator: validateUsername, trigger: "blur" }],
+      password: [{ validator: validatePassword, trigger: "blur" }],
+      passwords: [{ validator: validatePasswords, trigger: "blur" }],
+      code: [{ validator: validateCode, trigger: "blur" }]
+    });
+    //表单绑定数据
+    const ruleForm = reactive({
+      username: "",
+      password: "",
+      passwords: "",
+      code: ""
+    });
+    //数据是对象类型用reactive处理
+    const menuTab = reactive([
+      { txt: "登录", current: true, type: "login" },
+      { txt: "注册", current: false, type: "resgister" }
+    ]);
+    //数据是基础类型用ref处理，通过model.value可以拿到值
+    //isRef判断数据是否为ref对象数据类型
+    // console.log(menuTab);
+    //toRefs将reactive对象数据类型转换为普通数据类型
+    // console.log(toRefs(menuTab));
+    const model = ref("login");
 
-    //用data接受点击事件传递而来的参数item
-    changeTab(data) {
-      //es6语法forEach循环遍历
-      this.menuTab.forEach(element => {
+    onMounted(() => {});
+    const changeTab = data => {
+      // console.log(data);
+      menuTab.forEach(element => {
         element.current = false;
       });
       //再给传入的data加入高光
       data.current = true;
       //修改模块的值，切换login和resgister
-      this.model = data.type;
-    },
-    submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+      model.value = data.type;
+    };
+    const submitForm = formName => {
+      context.$refs[formName].validate(valid => {
         if (valid) {
           alert("submit!");
         } else {
@@ -169,12 +170,18 @@ export default {
           return false;
         }
       });
-    },
-    //获取验证码
-    getSms() {
-      GetSms();
-    }
-  }
+    };
+    return {
+      menuTab,
+      model,
+      changeTab,
+      submitForm,
+      ruleForm,
+      rules
+    };
+  },
+  created() {},
+  mounted() {}
 };
 </script>
 <style lang="less" scoped>
