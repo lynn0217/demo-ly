@@ -1,4 +1,6 @@
 import axios from 'axios'
+//单独引入element弹出的组件
+import { ElMessage } from 'element-plus'
 //创建axios，赋给变量service
 const BASEURL = process.env.NODE_ENV === 'production' ? '' : '/api'
 const service = axios.create({
@@ -8,19 +10,21 @@ const service = axios.create({
 
 // 添加请求拦截器
 service.interceptors.request.use(function (config) {
-  // Do something before request is sent
   return config;
 }, function (error) {
-  // Do something with request error
   return Promise.reject(error);
 });
-
-// Add a response interceptor
+//添加响应拦截器
 service.interceptors.response.use(function (response) {
-  // Do something with response data
-  return response;
+  //邮箱为空弹出提示（后台
+  let data = response.data
+  if(data.resCode!== 0) {
+    ElMessage.error(data.message);
+    return Promise.reject(data)
+  }else {
+    return response;
+  }
 }, function (error) {
-  // Do something with response error
   return Promise.reject(error);
 });
 

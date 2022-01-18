@@ -60,7 +60,12 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')" class="block">提交</el-button>
+          <el-button
+            type="primary"
+            @click="submitForm('ruleForm')"
+            class="block"
+            :disabled="buttonStatus"
+          >{{model === 'login' ? '登录' : '注册'}}</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -140,7 +145,8 @@ export default {
         password: [{ validator: validatePassword, trigger: "blur" }],
         passwords: [{ validator: validatePasswords, trigger: "blur" }],
         code: [{ validator: validateCode, trigger: "blur" }]
-      }
+      },
+      buttonStatus: true
     };
   },
   created() {},
@@ -173,6 +179,11 @@ export default {
     },
     //获取验证码
     getSms() {
+      //邮箱为空弹出提示（前端
+      if (this.ruleForm.username == "") {
+        this.$message.error("邮箱不能为空!");
+        return false;
+      }
       let data = {
         username: this.ruleForm.username
       };
