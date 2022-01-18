@@ -78,7 +78,7 @@ export default {
   name: "login",
   data() {
     //验证用户名
-    var validateUsername = (rule, value, callback) => {
+    let validateUsername = (rule, value, callback) => {
       // let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
       if (value === "") {
         callback(new Error("请输入用户名"));
@@ -90,7 +90,7 @@ export default {
       }
     };
     //验证密码
-    var validatePassword = (rule, value, callback) => {
+    let validatePassword = (rule, value, callback) => {
       // let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
       if (value === "") {
         callback(new Error("请输入密码"));
@@ -101,7 +101,7 @@ export default {
       }
     };
     //重复密码
-    var validatePasswords = (rule, value, callback) => {
+    let validatePasswords = (rule, value, callback) => {
       // let reg = /^(?!\D+$)(?![^a-zA-Z]+$)\S{6,20}$/;
       if (value === "") {
         callback(new Error("请输入密码"));
@@ -112,7 +112,7 @@ export default {
       }
     };
     //验证码
-    var validateCode = (rule, value, callback) => {
+    let validateCode = (rule, value, callback) => {
       // let reg = /^[a-z0-9]{6}$/;
       if (value === "") {
         callback(new Error("请输入验证码"));
@@ -122,6 +122,7 @@ export default {
         callback();
       }
     };
+
     return {
       menuTab: [
         { txt: "登录", current: true, type: "login" },
@@ -172,7 +173,10 @@ export default {
     },
     //获取验证码
     getSms() {
-      GetSms();
+      let data = {
+        username: this.ruleForm.username
+      };
+      GetSms(data);
     }
   }
 };
