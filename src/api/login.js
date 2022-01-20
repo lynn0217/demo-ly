@@ -1,7 +1,7 @@
 import service from "@/tools/request.js";
 //获取验证码
 export function GetSms(data) {
-  service.request({
+  return service.request({
     method:'post',
     url:'/getSms/',
     data:data

@@ -20,13 +20,14 @@
         class="form_login"
       >
         <el-form-item prop="username">
-          <label class="style = wordStyle">邮箱</label>
-          <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
+          <label class="style = wordStyle" for="username">邮箱</label>
+          <el-input type="text" id="username" v-model="ruleForm.username" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item prop="password">
-          <label class="style = wordStyle">密码</label>
+          <label class="style = wordStyle" for="password">密码</label>
           <el-input
+            id="password"
             type="password"
             v-model="ruleForm.password"
             autocomplete="off"
@@ -36,8 +37,9 @@
         </el-form-item>
 
         <el-form-item prop="passwords" v-if="model === 'resgister'">
-          <label class="style = wordStyle">重复密码</label>
+          <label class="style = wordStyle" for="passwords">重复密码</label>
           <el-input
+            id="passwords"
             type="password"
             v-model="ruleForm.passwords"
             autocomplete="off"
@@ -47,10 +49,10 @@
         </el-form-item>
 
         <el-form-item prop="code">
-          <label class="style = wordStyle">验证码</label>
+          <label class="style = wordStyle" for="code">验证码</label>
           <el-row>
             <el-col :span="16">
-              <el-input v-model.number="ruleForm.code" minlength="6" maxlength="6"></el-input>
+              <el-input id="code" v-model.number="ruleForm.code" minlength="6" maxlength="6"></el-input>
             </el-col>
 
             <el-col :span="8">
@@ -180,14 +182,23 @@ export default {
     //获取验证码
     getSms() {
       //邮箱为空弹出提示（前端
+      //加了拦截就不会请求接口，而是先做判断，条件成立才跑接口
       if (this.ruleForm.username == "") {
         this.$message.error("邮箱不能为空!");
+        //return false  不再执行以下代码
         return false;
       }
+      if (validateEmail(this.ruleForm.username)) {
+        this.$message.error("邮箱格式有误!");
+        return false;
+      }
+      //请求接口
       let data = {
         username: this.ruleForm.username
       };
-      GetSms(data);
+      GetSms(data)
+        .then(response => {})
+        .catch(error => {});
     }
   }
 };
