@@ -168,6 +168,9 @@ export default {
       data.current = true;
       //修改模块的值，切换login和resgister
       this.model = data.type;
+      //重置表单,不用中括号[]
+      // this.$refs[ruleForm].resetFields();
+      this.$refs.ruleForm.resetFields();
     },
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
